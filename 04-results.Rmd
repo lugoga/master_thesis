@@ -7,6 +7,8 @@ The Geographical coordinate points of ten fish landing sites located in south of
 require(tidyverse)
 require(kableExtra)
 require(leaflet)
+require(ggsci)
+
 ```
 
 
@@ -57,7 +59,11 @@ leaflet(data = site %>% filter(district == "Bagamoyo") ) %>%
 Although the landing sites in Bagamoyo District (Figure \@ref(fig:fig42)) were closer to each other than for Kindondoni district (Figure \@ref(fig:fig41)), the distance interval between sites were not clustered but rather spatially dispersed and significant The dispersion of landing sites was significant the result was significant ( *P* < 0.01, Figure \@ref(fig:fig43)). 
 
 ```{r fig43, fig.cap="Average Nearest Neighbor Tool showing the statistical results of distribution pattern of fish landing sites across the study area", echo=FALSE}
-knitr::include_graphics("./graphics/distribution_patten.png")
+
+# knitr::include_graphics("./graphics/distribution_patten.png")
+
+cowplot::ggdraw() +
+cowplot::draw_image("./_book/graphics/distribution_patten.png", scale = .75)
 
 ```
 
@@ -67,7 +73,10 @@ Fishing vessels were used as spatial attribute to determine the spatial characte
 
 ```{r fig44, fig.cap="oran’s I Tool showing the statistical results of distribution pattern of fishing vessels across the study area", echo=FALSE}
 
-knitr::include_graphics("./graphics/morans_I.png")
+# knitr::include_graphics("./graphics/morans_I.png")
+
+cowplot::ggdraw() + 
+  cowplot::draw_image("./_book/graphics/morans_I.png", scale = .75 )
 
 ```
  
@@ -101,27 +110,21 @@ leaflet(data = zscore) %>%
 ```
 
 
-##	Characteristics of fishing vessels at the landing sites
+##	Characteristics of fishing vessels
 
-Surveying among landing site for each vessel category, sites of particularly high fishing vessel percentage composition were identified (Fig. 6). Most notably, boat in Kunduchi landing site was the highest (52.75%) by far surpassed the composition of boats in other landing sites.  Outrigger canoe percentage were numerically highest at Ununio (60.81%), followed by Nchipana (50%), custom (56.76%) and Mbegani (67.57%). Dugout canoe constituted 70.37% of all vessels recorded at Changwahela and 52.56% at Mbweni. Dhow contributed 70.37 of all fishing vessels at Mlingotini and Mashua was domint at Nchipana constituting 37.50%.
+Surveying among landing site for each vessel category, sites of particularly high fishing vessel percentage composition were identified (Fig. 6). Much of the fishing vesels sugges that fishing landing sites wiwth more boats are those locate in the urban centers and with reliable fishing markets. Kunduchi and Custom landing sites contribute more than 80 of the boats in the study area (Figure \@ref(fig:fig46)a). The dugout canoe is used more in Kinondoni than Bagamoyo where the fishing landing sites of Kindondoni contributed more than  common  vessels for the fishing landing sites at Kinondoni district. All four landing sites from Kindondoni contributed more than 80% of the dugout canoe (Figure \@ref(fig:fig46)c). The outrigger canoe was widely distributed in all the landing sites except Mlingotini (Figure \@ref(fig:fig46)b). Under a different circumstance, Mlingotini landing sites contributed more than 50 perecnt of dhows alone (Figure \@ref(fig:fig46)d).
 
-```{r}
+
+```{r echo=FALSE}
 
 vessels = readxl::read_excel("./DATA  ENTRY SHEET.xls", sheet =1 )
 vessels = vessels %>% slice(1:10) %>% select(-X, -Y)
 
-ggplot(data = vessels %>% arrange(desc(Boat)), aes(x = FLS_Name, y = Boat, fill = DISTRICT))+ geom_col() + coord_flip()+
-  cowplot::theme_cowplot()
-```
-
-```{r}
 vessels$Boat = as.integer(vessels$Boat)
 vessels$`outrigger canoe` = as.integer(vessels$`outrigger canoe`)
 vessels$dugoutcanoe = as.integer(vessels$dugoutcanoe)
 vessels$dhow = as.integer(vessels$dhow)
 vessels$mashua = as.integer(vessels$mashua)
-
-
 
 vessel.p = vessels %>% transmute(boat = Boat/sum(Boat, na.rm = TRUE)*100,
                                  outrigger = `outrigger canoe`/sum(`outrigger canoe`, na.rm = TRUE)*100,
@@ -130,140 +133,294 @@ vessel.p = vessels %>% transmute(boat = Boat/sum(Boat, na.rm = TRUE)*100,
                                  mashua = mashua /sum(mashua, na.rm = TRUE)*100) %>%
   bind_cols(vessels %>% select(District = 1, site = 3)) %>%
   gather(key = "gear", value = "percentage", 1:5)
-
 ```
-```{r}
-ggplot(data = vessel.p %>% filter(District == "BAGAMOYO"), aes(x = site, y = percentage))+ geom_col(position = "dodge")+
-  facet_wrap(~gear, scales = "free_y")
+
+
+
+```{r fig46, fig.cap="Dominant vessels vary with fish landing site a) boats b) Outrigger canoe c) dugout Canoe and d) dhow", warning=FALSE, echo=FALSE}
+boat = ggplot(data = vessel.p %>% filter(gear == "boat"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Kunduchi", "Custom", "Msasani", "Mlingotini", "Kaole", "Mbegani", "Nchipanda","Mbweni", "Changwahela", "Ununio") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(5,60,10))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of Boats")+
+  scale_fill_jco()
+
+outrigger = ggplot(data = vessel.p %>% filter(gear == "outrigger"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Ununio","Msasani", "Custom", "Nchipanda", "Mbweni", "Mbegani", "Kunduchi", "Kaole","Changwahela", "Mlingotini") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(4,20,4))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of Outrigger Canoe")+
+  scale_fill_jco()
+
+dugout = ggplot(data = vessel.p %>% filter(gear == "dugout"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Kunduchi","Mbweni","Msasani", "Ununio", "Changwahela", "Mlingotini", "Custom", "Kaole", "Mbegani", "Nchipanda") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(6,30,6))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of Dugout Canoe")+
+  scale_fill_jco()
+
+dhow = ggplot(data = vessel.p %>% filter(gear == "dhow"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Mlingotini","Mbweni","Msasani","Ununio","Custom","Kaole","Kunduchi",  "Changwahela",  "Mbegani", "Nchipanda") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(8,60,8))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of Dhows")+
+  scale_fill_jco()
+
+cowplot::plot_grid(boat, outrigger,dugout, dhow, nrow = 2, 
+                   labels = c("a)", "b)", "c)", "d)"), label_colour = "grey70", label_size = 12, label_fontface = "plain", label_x = .8, label_y = 0.25)
+
 ```
 
  
-Figure 6: Percentage composition of different type of fishing vessels at each fish landing site.
-
 ## Similarity of Fish Landing Sites 
 The similarity of fish landing sites was determined using type and abundance of fishing vessels. Kaole,   and msasani  had the highest  similarity  of  about  90%,  where as  kaole  and  mbegani  were very similar (80%). Ununio, custom and Kunduchi showed a similarity with msasani and mbweni by 80, 70 and 64, respectively. While Nchipana and Mlingotini were more different from one another and with the rest landing   sites, about 60% of fishing vessels at changwahela showed to be very similar to kaole and mbegani landing sites (Fig.7).   
  
 Figure 7: Bray-Curtis similarity of fish landing sites, fish landing sites at the right are more similar to one another than the landing sites toward the left of the dendrogram
 	
-##	Characteristics of fishing gears at the landing sites
-Looking on the percentage contribution of fishing gear in the fish landing sites, gillnets were numerically highest at Custom (84.31%), Longline percentage composition at Mbegani (71.09%) far exceeded other landing sites. Trap fisheries were found numerically higher at Mbweni (67.46%), followed by Kaole (Fig. 8). The percentage of destructive fishing gears such as beach seine at each fish landing site was very small, the highest percentage of beach seine and spear was 1.57 and 2.22 at Custom and Kunduchi fish landing sites, respectively.
- 
-Figure 8: Percentage composition of different types of fishing gears used at each fish landing site
+##	Characteristics of fishing gears 
+When it comes to the dominant fishing gears, each landing sites is different (Figure \@ref(fig:fig47)).
+Looking on the percentage contribution of fishing gear in the fish landing sites, gillnets were numerically dominant fishing gear at Custom (Figure \@ref(fig:fig47)d), handline at Kunduchi (Figure \@ref(fig:fig47)a), traps at Mbweni (Figure \@ref(fig:fig47)b) and shark nets at Ununio (Figure \@ref(fig:fig47)c). There was no fishing gears recorded at Mlingotini and Changwahela because this landing sites are often used as port---transport good and services between Zanzibar and Mainland Tanzania. 
 
+
+```{r echo=FALSE}
+
+gear = readxl::read_excel("./DATA  ENTRY SHEET.xls", sheet =3 )
+gear = gear %>% slice(1:10) %>% select(-X, -Y)
+
+gear$handline = as.integer(gear$handline)
+gear$longline = as.integer(gear$longline)
+gear$traps = as.integer(gear$traps)
+gear$sharknet = as.integer(gear$sharknet)
+gear$seinenet = as.integer(gear$seinenet)
+gear$gillnet = as.integer(gear$gillnet)
+
+gear.p = gear %>% transmute(handline = handline/sum(handline, na.rm = TRUE)*100,
+                                 longline = longline/sum(longline, na.rm = TRUE)*100,
+                                 traps = traps /sum(traps, na.rm = TRUE)*100,
+                                 sharknet = sharknet /sum(sharknet, na.rm = TRUE)*100,
+                                 seinenet = seinenet /sum(seinenet, na.rm = TRUE)*100, 
+                            gillnet = gillnet /sum(gillnet, na.rm = TRUE)*100) %>%
+  bind_cols(gear %>% select(District = 1, site = 3)) %>%
+  gather(key = "gear", value = "percentage", 1:6)
+```
  
-Figure 9: Map showing the most dominant fishery type at each fish landing site in the study area
+ 
+```{r fig47, fig.cap="Dominant fishing gears vary with fish landing sites a) handline b) traps c) shark net and d) gill net", warning=FALSE, echo=FALSE}
+ handline = ggplot(data = gear.p %>% filter(gear == "handline"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Kunduchi", "Nchipanda", "Msasani", "Ununio","Mbweni","Mbegani","Kaole", "Mlingotini",   "Custom", "Changwahela") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(5,30,6))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of handline")+
+  scale_fill_jco()
+
+traps = ggplot(data = gear.p %>% filter(gear == "traps"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Mbweni","Kunduchi","Kaole", "Msasani","Ununio","Mbegani","Nchipanda",   "Mlingotini",   "Custom", "Changwahela") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(8,60,8))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of Traps")+
+  scale_fill_jco()
+
+sharknet = ggplot(data = gear.p %>% filter(gear == "sharknet"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Ununio","Custom","Mbweni","Msasani","Kunduchi","Kaole", "Mbegani","Nchipanda",   "Mlingotini",  "Changwahela") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(6,45,6))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of Shark Nets")+
+  scale_fill_jco()
+
+
+gillnet = ggplot(data = gear.p %>% filter(gear == "gillnet"), 
+       aes(x = site, y = percentage, fill = District))+ geom_col()+
+  scale_x_discrete(limit = c("Custom","Msasani","Kaole","Mbweni","Kunduchi","Ununio", "Mbegani","Nchipanda",   "Mlingotini",  "Changwahela") %>% rev())+
+  scale_y_continuous(position = "right", breaks = seq(8,65,8))+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .75,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Percentage of Gill Nets")+
+  scale_fill_jco()
+
+cowplot::plot_grid(handline, traps,sharknet, gillnet, nrow = 2, 
+                   labels = c("a)", "b)", "c)", "d)"), label_colour = "grey70", label_size = 12, label_fontface = "plain", label_x = .8, label_y = 0.25)
+
+```
+ 
 
 ##	Fish groups landed at the fish landing sites 
 Spatial data for Common fish groups presented here was available for three fish landing sites of Custom (Bagamoyo), Msasani and Kunduchi (Kinondoni). Data limitations prevented detailed error estimation and also any formal consideration of temporal variability in fishing catches. Thus, the result characterizes annual fish catch but does not capture the monthly or seasonal changes that undoubtedly occur. Nine groups of fish were selected for analysis because of their total abundance landed at the landing sites. These groups were considered as dominant in terms of showing highest landings registered. 
 
 Fish family group composition landed varies among landing sites.  In general, a sardine (Clupidae) had shown to be the most dominant group within the study area. Clupidae was the most landed fish group at Custom,comprise more than 50%, followed by Scombridae, Labridae, Siganidae Lenthrinidae (Fig. 10). At Kunduchi landing site, like Custom, the catches landed was dominated by Clupidae, contributing more than 26% of the total fish landed, followed by Scombridae  Lenthrinidae, Hemiramphidae, Siganidae (Fig. 11). Unlike Custom and Kunduchi, where the dominant fish family was Clupidae, Lenthrinidae was most landed fish group at Msasani landing site, contributing more than 38%, followed by Labridae, Carangidae, Scombridae  and Siganidae (Fig. 12).
- 
-Figure 10: Most common fish family groups landed at Custom landing site
- 
-Figure 11: Most common fish family groups landed at Kunduchi landing site
- 
-Figure 12: Most common fish family groups landed at Msasani landing site
+
+```{r, echo=FALSE}
+species = readxl::read_excel("./DATA  ENTRY SHEET.xls", sheet =8 )
+## convert to wide form and fill empty cell with NA
+species = species %>% spread(key = Family, value = Percentage, fill = NA)
+## convert back to long form
+species = species %>% gather(key = "Family", value = "Percentage", 2:14)
+
+```
+
+```{r fig48, fig.cap="Common fish family landed at Custom, Kunduchi and Msasani landing site", echo=FALSE, warning=FALSE, message=FALSE, comment=""}
+ggplot(data = species, aes(x = Family, y = Percentage, fill = site)) + geom_col(position = "dodge") +scale_y_continuous(position = "right", breaks = seq(8,65,8))+
+  coord_flip()+
+  theme_minimal()+
+  theme(axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = c(.85,.25),
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2),
+        legend.text = element_text(colour = "grey40", size = 11),
+        legend.title = element_text(colour = "grey30", size = 12))+
+  labs(x = NULL, y = "Percentage")+
+  scale_fill_jco(name = "Landing\nSite")+
+  scale_x_discrete(limit = c("Scombridae","Siganidae","Lethrinidae","Labridae","Clupeidae","Hemiramphidae", "Rays","Chirocentridae",   "Carangidae",  "Sphyraenidae") %>% rev())
+
+```
 
 ##	Density of fishing vessels at the landing sites
-Density of fishing vessels varies among landing sites. Fishing vessel densities were numerically highest at Nchipana (74.20 vessels/km) followed by Custom (30.20 vessels/km), and Kunduchi (19.40 vessels/km) (Fig. 13). In general, landing sites located at Kinondoni district showed to have low density of fishing vessel compared to those located at Bagamoyo district (Table 2). 
+Table \@ref(tab:tab42) shows the density of fishing vessels along a stretch of the fishing landing sites. Density of fishing vessels varies among landing sites. Fishing vessel densities were numerically highest at Nchipana (74.20 vessels/km) followed by Custom (30.20 vessels/km), and Kunduchi (19.40 vessels/km). In general, landing sites located at Kinondoni district showed to have low density of fishing vessel compared to those located at Bagamoyo district. 
  
-Figure 13: A map of Bagamoyo and Kinondoni districts showing density of fishing vessel along the coastline of each fish landing sites across the study area.
+```{r tab42, echo=FALSE}
+density = readxl::read_excel("./DATA  ENTRY SHEET.xls", sheet =9 )
 
+density %>% 
+  arrange(desc(Density))%>%
+  kable("html", col.names = c("District", "Landing Site", "Coastline length (Km)", "Number of Vessels", "Density"),
+caption = "Density of fishing vessels at each landing sites in the study area
+District	Landing site	Coastline (km)	vessels	Density") %>%
+  column_spec(column = 1:5, width = "5cm")
 
+```
 
-Table 2: Density of fishing vessels at each landing sites in the study area
-District	Landing site	Coastline (km)	vessels	Density 
-Bagamoyo
-	Nchipana	0.97	72	74.23
-	Custom	2.45	74	30.20
-	Kaole	5.62	22	3.91
-	Mbegani	3.53	37	10.48
-	Mlingotini	8.38	64	7.64
-	Changwahela	12.19	27	2.21
-Kinondoni
-	 Mbweni	7.91	78	9.86
-	 Ununio	7.63	74	9.70
-	Kunduchi	9.4	182	19.36
-	Msasani	9.54	101	10.59
 
 ##	Investment value of fish landing site 
-Table 4 and 5 summarizes the cost of different types of fishing gears and vessels. These tables show the minimum and maximum price of a different gear and vessel type, as well the average price. While gillnets, ring nets, beach seine, shark net, and seine net were observed to be the most expensive fishing gear in the study area (Fig. 14b), traps, spear and handline were the least expensive ones (Fig. 14a). Looking on fishing vessel, the price of fishing vessels by type did not vary much within fish landing sites because most of fishing vessel used in the study area were not made in the area, were bought in Tanga. Three most expensive fishing vessels were Boat, followed by dhow and Mashua with price ranging between 4,000,000 and 4,900,000 Tsh, whereas dugout and outrigger canoe were the cheapest fishing vessels recorded (Fig. 15).  
-
-Table 3: Prices of different fishing gears at the study area
-	Price range of fishing  gears (Tsh)
-Gear	Minimum	Maximum	Average price
-Handline	800	1200	1000
-Spear	12000	15000	13500
-Traps	11000	31000	21000
-Longline	6500	70000	38250
-Gill net	50000	600000	325000
-Beach seine	1000000	1700000	1350000
-Shark net	2500000	3500000	3000000
-Seine net	2500000	4000000	3250000
-Ringnet	3814000	5200000	4507000
-
-
-
-
-
-
-
+Table \@ref(tab:tab43) summarizes the cost of different types of fishing gears. While gillnets, ring nets, beach seine, shark net, and seine net were the most expensive fishing gear in the study area, traps, spear and handline were the least expensive ones.
 
  
+```{r tab43, echo=FALSE}
+inv = readxl::read_excel("./DATA  ENTRY SHEET.xls", sheet =10 )
 
- 
-Figure 14: Average price of common fishing gears used for artisanal fishing at the landing sites located along the coast of Bagamoyo and Kinondoni Districts. Figure 14 (a) shows fishing gear with low investment cost required where as figure 14 (b) are the medium to the most expensive fishing gear.
+inv %>% 
+  filter(Type == "Gear")%>%
+  select(-Type)%>%
+  kable("html", digits = 2, col.names = c("Gear", "Minimum", "Maximum", "Mean"),
+caption = "Investment cost of making fishing gears at the study area (US$)") %>%
+  column_spec(column = 1:4, width = "5cm") %>%
+  add_header_above(c("", "Price of Gear (in US$)" = 3))
 
-Table 4: Prices of different fishing vessels at the study area
-Vessel/Price	Minimum	Maximum	Average
-Dugout canoe 	150000	400000	275000
-Outrigger canoe	300000	1200000	750000
-Mashua	4000000	4000000	4000000
-Dhow	4500000	5000000	4750000
-Boat	4800000	5000000	4900000
+```
 
- 
-Figure 15: Average price of common fishing vessel used for artisanal fishing at the landing sites located along the coast of Bagamoyo and Kinondoni Districts
-.
-Looking on total investment value of fish landing sites based on the fishing vessel, landing sites of particularly high investment were identified. The value of only fishing vessels for the entire study area was estimated to be 1.47 billion TSh (Table 5) and total investment at Kunduchi landing sites far exceeded other landing sites, followed by Mlingotini, Msasani , Nchipana Custom and Mbweni. Ununio, Kaole, Mbegani and Changwahela had total investment value below 100 Millions (Fig. 16). 
+Looking on fishing vessel, the price of fishing vessels by type did not vary much within fish landing sites because most of fishing vessel used in the study area were not made in the area, were bought in Tanga. Three most expensive fishing vessels were Boat, followed by dhow and Mashua with price ranging between 3500 US and 4500 US, whereas dugout and outrigger canoe were the cheapest fishing vessels recorded (Table \@ref(tab:tab44))
 
+```{r tab44, echo=FALSE}
+inv %>% 
+  filter(Type == "Vessel")%>%
+  select(-Type)%>%
+  kable("html", digits = 2, 
+        col.names = c("Gear", "Minimum", "Maximum", "Mean"),
+caption = "Investment cost of making fishing Vessels at the study area (US$)") %>%
+  column_spec(column = 1:4, width = "5cm") %>%
+  add_header_above(c("", "Price of Vessel (in US$)" = 3))
 
-Table 5: Investment value of the landing sites based on the total value of different type of fishing vessels
-Landing site	Boat 	Outrigger 	Dugout 	Dhow 	Mashua 	Total
-Changwahela	4900000	1650000	14250000	4750000	      -	25550000
-Mbegani	24500000	6875000	5250000	      -	      - 	36625000
-Kaole	29400000	1375000	5250000	19000000	      -	55025000
-Ununio	     -	12375000	16500000	28500000	4000000	61375000
-Mbweni	9800000	6325000	30750000	52250000	4000000	103125000
-Custom	78400000	11550000	8250000	19000000	4000000	121200000
-Nchipana	4900000	9900000	6000000	 -	108000000	128800000
-Msasani	44100000	10450000	29250000	52250000	16000000	152050000
-Mlingotini	29400000	   -	9000000	218500000	       -	256900000
-Kunduchi	470400000	5500000	48000000	4750000	4000000	532650000
-Total	1473300000
+```
 
+Looking on total investment value of fish landing sites based on the fishing vessel, landing sites of particularly high investment were identified. The value of only fishing vessels for the entire study area was estimated to be 1.47 billion TSh (~US$ 1.3 million) and total investment at Kunduchi landing sites far exceeded other landing sites, followed by Mlingotini, Msasani , Nchipana Custom and Mbweni. Ununio, Kaole, Mbegani and Changwahela had total investment value below 100 Millions (Figure \@ref(fig:fig49)). 
 
- 
-Figure 16: Total investment value of the fish landing based on the value of different types of fishing vessel.
-4.10	Percentage of Fishermen at the fishing village
-While Mlingotini had more than 18% of its population engaging in fisheries, which is the greatest percentage of people in the study area, other fishing villages had less than 10% of their total population (Table 6). It was found that fishing village located at the urban centers, which are Msasani, and Kunduchi had the lowest percentage of fishermen (Fig 17). 
+```{r fig49, echo=FALSE, fig.cap="Total investment value of the fish landing based on the value of different types of fishing vessel"}
+total = readxl::read_excel("./DATA  ENTRY SHEET.xls", sheet =11)%>% 
+  mutate(inv = Total/1100)
 
-Table 6: Population size and the percent of fishermen for fishing village in the study area
-District	Fishing Village	Population	Fishers	Percent
+ggplot(data = total, aes(x = site, y = inv)) +
+  geom_col(fill = "maroon") +
+  scale_y_continuous(labels = scales::comma, position = "right")+
+  scale_x_discrete(limit = c("Kunduchi","Mlingotini", "Msasani","Nchipana", "Custom","Mbweni","Ununio","Kaole", "Mbegani", "Changwahela") %>% rev())+
+  coord_flip()+
+  theme_minimal()+
+  theme(aspect.ratio = .5,
+        axis.text = element_text(size = 10, colour = "grey50"),
+        axis.title = element_text(colour = "grey40", size = 12), 
+        legend.position = "none",
+        legend.background = element_rect(colour = "grey60", size = .25),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linetype = 2),
+        panel.grid.minor.x = element_line(linetype = 2))+
+  labs(x = NULL, y = "Investment Cost (US$)")
 
-Kinondoni	Msasani	43259	315	0.73
-	Kunduchi	72275	473	0.65
-	Ununio	2223	80	3.60
-	Mbweni	1541	68	4.41
-
-
-Bagamoyo	Mapinga	3823	72	1.88
-	Mlingotini	1974	361	18.29
-	Pande	1340	77	5.75
-	Kaole	1149	66	5.74
-	Dunda	14460	590	4.08
-Source: Tanzania Bureau of Statistics and Fisheries Development Division
-
- 
-Figure 17: Graph showing the percentage fishermen at the fishing village in the study area.
-
+```

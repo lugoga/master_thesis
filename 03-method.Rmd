@@ -1,8 +1,80 @@
 # Methods {#methods}
 ## Study area
-The research was carried out in the coastal areas of southern Bagamoyo and the whole Kinondoni District from November 2010 to April 2011. The area has coastline of about 70 km, which includes ten permanent fish landing sites, Custom, Kunduchi and Msasani being locted in urban centers (Fig.1). The climate at Bagamoyo and Kinondoni Districts, as long as the rest of the coast of Tanzania is dominated by monsoon winds which influence the weather and the coastal current patterns such as the East African Coastal Current.  The reversing monsoon wind occurs between October and March (northeast (NE) monsoon), and the southeast (SE) monsoon season from April to October [@richmond]. As a result, wet seasons, alternate with dry season [@richmond]. A longer rain period occurs in March to May, and shorter rainy season usually occurs in November. The fish landing lies along the east coast bordering the Zanzibar Channel, one of the most productive marine fisheries areas in Tanzania [@semesi2001]. 
+The research was carried out in the coastal areas of southern Bagamoyo and the whole Kinondoni District from November 2010 to April 2011. The area has coastline of about 70 km, which includes ten fish landing sites. Figure \@ref(fig:fig31) show the the four landing sites in Kinondoni district and  figure \@ref(fig:fig32) shows the six landing sites in Bagamoyo District. 
 
-Figure 1: A map of Bagamoyo and Kinondoni Districts showing the location of the fish landing sites. 
+The climate at Bagamoyo and Kinondoni Districts, as long as the rest of the coast of Tanzania is dominated by monsoon winds which influence the weather and the coastal current patterns such as the East African Coastal Current.  The reversing monsoon wind occurs between October and March (northeast (NE) monsoon), and the southeast (SE) monsoon season from April to October [@richmond]. As a result, wet seasons, alternate with dry season [@richmond]. A longer rain period occurs in March to May, and shorter rainy season usually occurs in November. The fish landing lies along the east coast bordering the Zanzibar Channel, one of the most productive marine fisheries areas in Tanzania [@semesi2001]. 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE,  comment=""}
+require(sf)
+require(tidyverse)
+
+kinondoni = data.frame(site = c("Msasani","Kunduchi", "Ununio", "Mbweni"),
+          lon = c(39.269,39.219, 39.178, 39.136),
+          lat = c(-6.760, -6.668, -6.627, -6.576)) %>%
+  mutate(district = "Kinondoni")
+
+bagamoyo = data.frame(site = c("Changwahela", "Mlingotini", "Mbegani", "Kaole", "Custom", "Nchipana"),
+           lon = c(39.087,39.0,38.970,38.941,38.910,38.907 ),
+           lat = c(-6.523,-6.479,-6.472,-6.459,-6.440, -6.436)) %>%
+  mutate(district = "Bagamoyo")
+
+site = kinondoni %>% bind_rows(bagamoyo)
+
+site.sf = site %>% st_as_sf(coords =c("lon", "lat")) %>% st_set_crs(4326)
+```
+
+
+
+```{r fig31, fig.cap="Four landing sites in Kinondoni Districts that were selected for this study", echo=FALSE, warning=FALSE, message=FALSE,  comment=""}
+
+
+
+##read Africa continental shapefile that we will use throught the munuscript as basemap dataset for maps
+africa = read_sf("E:/GIS/Tanzania spatial data Bank/EAF14 Tanzania spatial datasets/africa/Spatial/AdmInfr/afcntry.shp")
+
+## clean the file
+tz.ke = africa%>%select(-c(FIPS_CNTRY, REGIONA, EMPTY, EMPTY2))%>%
+  filter(CNTRY_NAME == "Tanzania" | CNTRY_NAME == "Kenya")
+
+
+
+ggplot()+
+  geom_sf(data = tz.ke, fill = "grey80", colour = "black")+
+  geom_sf(data = site.sf, size = 4)+
+  ggrepel::geom_text_repel(data = site %>% 
+                             filter(site %in% c("Msasani", "Kunduchi", "Ununio", "Mbweni")), 
+                           aes(x = lon, y = lat, label = site), nudge_x = 0.004, nudge_y = 0.03, colour = 1, segment.color = 2) +
+  coord_sf(xlim = c(39.1, 39.3), ylim = c(-6.76, -6.55))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11))+
+  labs(x = NULL, y = NULL)+
+  geom_text(aes(x = 39.25, y = -6.6, label = "INDIAN OCEAN"))+
+  ggsn::scalebar(location = "bottomleft", x.min = 39.11, x.max = 39.3, y.min = -6.75, y.max = -6.55, dist = 4, dd2km = TRUE, model = "WGS84", height = 0.04, st.dist = 0.04, st.size = 4)
+  
+
+
+```
+
+
+
+```{r fig32, fig.cap="Six landing sites in Bagamoyo Districts that were selected for this study", echo=FALSE, warning=FALSE, message=FALSE,  comment=""}
+
+
+ggplot()+
+  geom_sf(data = tz.ke, fill = "grey80", colour = "black")+
+  geom_sf(data = site.sf, size = 4)+
+  ggrepel::geom_text_repel(data = site %>%
+                             filter(site %in% c("Changwahela", "Mlingotini", "Mbegani", "Kaole", "Custom", "Nchipana")),
+                           aes(x = lon, y = lat, label = site), nudge_x = -0.004, nudge_y = -0.02, colour = 1, segment.color = 2) +
+  coord_sf(xlim = c(38.9, 39.1), ylim = c(-6.55, -6.42))+
+  theme_bw()+
+  theme(axis.text = element_text(size = 11))+
+  labs(x = NULL, y = NULL)+
+  geom_text(aes(x = 39.025, y = -6.43, label = "INDIAN OCEAN"))+
+  ggsn::scalebar(location = "bottomleft", x.min = 38.9, x.max = 39.1, y.min = -6.54, y.max = -6.42, dist = 2, dd2km = TRUE, model = "WGS84", height = 0.04, st.dist = 0.04, st.size = 4)
+
+```
+
 
 ## Mapping
 One among the requirements for mapping is the coordinate points; the geographical coordinates of ten fish landing sites in the study area were collected.  A field visit was done and `longitude` and `latitude` as geographical points for each landing site was recorded using hand held Geographical Positioning System (GPS) unit. These points were exported from `GPS` unit to `Drawing Exchange` Format (DXF) using Garmin MapSource software to and later converted to GIS compatible vector format (shapefile) in **SAGA**, GIS software. The setups of **Garmin MapSource** were first synchronized with those of **GPS** unit to `WGS84` as a datum using longitude and latitude (in decimal degree) as a geographical position.
@@ -14,6 +86,14 @@ The basemap datasets, which included administration boundary, habitat, hydrology
 A coastline dataset available from the World Vector Shoreline (WVS) was much generalized, summarized complex Tanzania’s coastline into a simple line for display, and hence was not suitable for measuring the length of coastline for small scale areas. A detailed coastline for the study area was extracted using high detailed feature class dataset from IMS GIS database. Determination of the length of the coastline was based on the following criteria: 1) the coastline is made up of individual line, which has two or more vertices. 2) The sum of the lengths of the pairs of vertices is aggregated for each individual line, and 3) the sum of the lengths of individual lines was aggregated for coastline. Using ArcMAP, two processes were deployed; first, establishing a line representing a coastline. This was done by converting the polygon feature class of the Bagamoyo and Kinondoni Districts to polyline using “feature to polyline tool” in Data Management toolbox. The polyline feature class was further edited to a single line representing the coastline of the study area. This length of the coastline for the study area was further divided into individual fish landing site using “Split Tool” by taking an equidistant (the same distance apart at every point of the fish landing site) along the coastline.
 
 The second step was to measure the length of the coastline, which was done by using “measuring tool” in ArcMap.  The Measurement units of the of the tool was reset from the default map units to kilometers and determined the length by simply clicking directly on the coastline layer of each fish landing site in ArcMap, the results were displayed inside the window of the tool, which made easy to copy and paste them into the attribute table of the coastline feature class. Those portions of the coastline with little possibility for fish vessels to anchor was not considered in determination of the length of the coastline, hence the length presented here is a rough estimate focusing on the fish landing sites and should be used with caution
+
+The Pythagorean Theorem^[A mathematicc rlation in Euclidean geometry that states that the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides] was later used to compute the distance between the adjacent fish landing sites along the coastline. Given the two longitude points $(x1, x2)$ and  latitude points $(y1, y2)$, the distance $d$ between these points is given in equation \@ref(eq:eqn1):
+
+$$
+\begin{equation}
+d = \sqrt{(x_2 - x_1)^2 + (y_2 -y_2)^2} (\#eq:eqn1)
+\end{equation}
+$$
 
 ##	Characteristics of landing sites
 Attribute and spatial information which formed the basis for the characteristics were extracted from Fisheries Frame Surveys Database. Fish landing sites were characterized based on the fish related infrastructural facilities found at the site.. Data collected include, number of fishermen,  total catch of fish landed, species composition, type and number of fishing gear and fishing vessels, fish catch, fisheries officers, Beach Management Unit, processing and storage facilities; electricity and tap water availability; accessibility; and other fish related activities such as restaurants, boat builders and gear repair, and. For determination of the investment value of landing sites, semi-structured interviews were deployed in each landing sites to obtain the value of different type of fishing vessels and gears.  Questionnaires were prepared in English but administered in Swahili. The interview was directed to different stakeholders at the fish landing sites including influential fishers, beach recorders, fisheries officers, boat builders and the owners of fishing facilities. Collected data was processed and converted GIS compatible environment and then populated in feature class datasets stored in a personal geodatabase. 
