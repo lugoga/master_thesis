@@ -1,0 +1,10 @@
+# Conclusion and Recommendation
+
+## Conclusion
+Through the use of GIS technology, spatial distribution of fish landing sites has been mapped, and their spatial characteristics have been described. In addition, useful information of the investment values for each fish landing sites has been partially estimated. The study has also outlined a methodology for the incorporation of fisheries frame survey into simple GIS framework and illustrated not only how fish landing sites are spatially distributed, but also how non spatial information collected through fisheries frame survey can be incorporated in GIS to create thematic maps that aid in characterizing fish landing sites. 
+
+##	Recommendation
+
+Based on the study’s result, it is recommended that integration of Geographical Information Systems (GIS) with fisheries frame survey will improve collection and update of fisheries data as well as providing better information for sound management of fisheries sector in Tanzania.  Given the majority of the fish landing sites lacked fisheries related data, there is a need for improving data collection before processing and mapping operations can be undertaken. Since artisanal fisheries is operated in small fishing village, that are scattered along the coast, it is recommended that further research should be done that cover the whole coastline of Tanzania and monitor the fishery trend at the landing sites through compilation and analysis of spatial statistical data, that take into account the geographical location of the landing sites.
+
+

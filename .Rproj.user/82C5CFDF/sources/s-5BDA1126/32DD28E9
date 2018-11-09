@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1541686007043.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "32DD28E9",
+    "lastKnownWriteTime" : 1541685910,
+    "last_content_update" : 1541685910,
+    "path" : "E:/bookdown/master_thesis/06-conclusion.Rmd",
+    "project_path" : "06-conclusion.Rmd",
+    "properties" : {
+        "cursorPosition" : "5,17",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
