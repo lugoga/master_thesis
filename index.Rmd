@@ -1,11 +1,11 @@
 --- 
 title: "Putting Fishing Landing Sites and their Insfrastructure on Spatial Aspect"
 author: "Masumbuko Semba"
-date: "`r Sys.Date()`"
+date: "updated on `r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [master.bib]
-biblio-style: apalike
+biblio-style: elsevier.csl
 link-citations: yes
 description: "This dissertation is copyright material protected under the Berne Convention, the Copyright Act 1999 and other international and national enactments, in that behalf, on intellectual property. It may not be reproduced by any means, in full or in part, except for short extracts in fair dealings, for research or private study, critical scholarly review or discourse with an acknowledgement, without the written permission of the Directorate of Postgraduate Studies, on behalf of both the author and the University of Dar es Salaam"
 ---

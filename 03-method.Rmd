@@ -49,7 +49,10 @@ ggplot()+
   theme(axis.text = element_text(size = 11))+
   labs(x = NULL, y = NULL)+
   geom_text(aes(x = 39.25, y = -6.6, label = "INDIAN OCEAN"))+
-  ggsn::scalebar(location = "bottomleft", x.min = 39.11, x.max = 39.3, y.min = -6.75, y.max = -6.55, dist = 4, dd2km = TRUE, model = "WGS84", height = 0.04, st.dist = 0.04, st.size = 4)
+  ggspatial::annotation_north_arrow(which_north = "true", location = "tr", 
+                                    width = unit(1.2,"lines"), 
+                                    height = unit(1.2, "lines")) +
+  ggspatial::annotation_scale()
   
 
 
@@ -71,8 +74,10 @@ ggplot()+
   theme(axis.text = element_text(size = 11))+
   labs(x = NULL, y = NULL)+
   geom_text(aes(x = 39.025, y = -6.43, label = "INDIAN OCEAN"))+
-  ggsn::scalebar(location = "bottomleft", x.min = 38.9, x.max = 39.1, y.min = -6.54, y.max = -6.42, dist = 2, dd2km = TRUE, model = "WGS84", height = 0.04, st.dist = 0.04, st.size = 4)
-
+  ggspatial::annotation_north_arrow(which_north = "true", location = "tr", 
+                                    width = unit(1.2,"lines"), 
+                                    height = unit(1.2, "lines")) +
+  ggspatial::annotation_scale()
 ```
 
 
